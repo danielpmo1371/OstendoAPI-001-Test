@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace ConsoleApp2
+namespace OstendoAPI
 {
     class Program
     {
@@ -26,6 +26,7 @@ namespace ConsoleApp2
             Console.ReadLine();
             returned = await ReachAPI(client, returned);
             Console.WriteLine(returned);
+            Console.WriteLine("   ------   -----   ------  \n Test Finished. Press Enter to close application...");
             Console.ReadLine();
         }
         private static async Task<string> ReachAPI(HttpClient client, string returned)
