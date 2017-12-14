@@ -31,7 +31,7 @@ namespace OstendoAPI
         }
         private static async Task<string> ReachAPI(HttpClient client, string returned)
         {
-            HttpResponseMessage response = await client.GetAsync("/assemblyorder/WO1563?apikey=Ytm1VIhM2ai7fewNDR1zCV%2Btfijsk5hoYcM%2FZaaCuFwm4PCPM%2BUwBcNw9yE%2BZjT35Uf8%2BAog%2FGbOCbosjMEOyFYTHDgEGZHgJT4xxwbVnu%2BymJs%3D&configuration=0");
+            HttpResponseMessage response = await client.GetAsync("/assemblyorder/WO1563?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0");
             if (response.IsSuccessStatusCode)
             {
                 //product = await response.Content.ReadAsAsync<AssemblyIssue>();
