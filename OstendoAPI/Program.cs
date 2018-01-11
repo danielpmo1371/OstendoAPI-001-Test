@@ -23,10 +23,11 @@ namespace OstendoAPI
             client.BaseAddress = new Uri("http://Ostendo.ddns.net:235");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            Console.WriteLine("System initialized! Press 1 for Get Method and 2 for Post Method...");
+            Console.WriteLine("System initialized! Press 1 for Get Method, 2 for Post Method, 3 for SQL...");
             string method = Console.ReadLine();
             if (method.Equals("1")){ returned = await ReachAPI(client, returned); }
             if (method.Equals("2")){ returned = await PostAPI(client, returned); }
+            if (method.Equals("3")) { returned = await SQLAPI(client, returned); }
             Console.WriteLine(returned);
             Console.WriteLine("   ------   -----   ------  \n Test Finished. Press Enter to close application...");
             Console.ReadLine();
@@ -73,12 +74,37 @@ namespace OstendoAPI
             //string tableParam = "";
 
             //  -------- Working Example for Assembly Order ------- //
-            var content = new StringContent("<assemblyorder><orderheader><ordernumber></ordernumber><orderdate>11/01/2018</orderdate><itemcode>F2125</itemcode><itemdescription>Whole Milk Powder 25kg Bag- China</itemdescription><itemunit>Kg</itemunit><requireddate>11/01/2018</requireddate><orderqty>2000</orderqty><orderline><ordernumber></ordernumber><stepname>Assembly</stepname><codetype>Item Code</codetype><linecode>M7030</linecode><linedescription>Asssembly of 02125</linedescription><lineunit>Ltr</lineunit><orderqty>9000</orderqty></orderline></orderheader></assemblyorder>", Encoding.UTF8, "application/xml");
+            var content = new StringContent("<assemblyorder><orderheader><ordernumber></ordernumber><orderdate>11/01/2018</orderdate><itemcode>F2125</itemcode><itemdescription>Whole Milk Powder 25kg Bag- China</itemdescription><itemunit>Kg</itemunit><requireddate>11/01/2018</requireddate><orderqty>4000</orderqty><orderline><ordernumber></ordernumber><stepname>Assembly</stepname><codetype>Item Code</codetype><linecode>M7030</linecode><linedescription>Asssembly of 02125</linedescription><lineunit>Ltr</lineunit><orderqty>9000</orderqty></orderline></orderheader></assemblyorder>", Encoding.UTF8, "application/xml");
             //  -------- Working Example for Assembly Order ------- //
 
-            //var content = new StringContent("<purchaseorder> <orderheader> <ordernumber></ordernumber> <orderdate>9/04/2014</orderdate> <ordertype>Standard</ordertype> <supplier>Camelia Car Co Ltd</supplier> <orderaddress1>P O Box 37-400</orderaddress1> <orderaddress2>North Shore Mail Centre</orderaddress2> <orderpostalcode>1200</orderpostalcode> <orderstate>NI</orderstate> <ordercity>North Shore City</ordercity> <ordercountry>New Zealand</ordercountry> <orderphone>443-9999</orderphone> <orderfax>443-8888</orderfax> <orderemail>info@cameliacar.co.nz</orderemail> <deliverto>Company</deliverto> <deliveryname>Company</deliveryname> <deliveryaddress1>4 Pacific Rise</deliveryaddress1> <deliveryaddress2>Mt Wellington</deliveryaddress2> <deliverycity>Auckland</deliverycity> <deliverycountry>New Zealand</deliverycountry> <deliveryphone>+64-9-5253612</deliveryphone> <deliveryfax>+64-9-5253614</deliveryfax> <taxgroup>TAXABLE</taxgroup> <creditterm>20th of Month</creditterm> <orderline> <ordernumber></ordernumber> <linenumber>10</linenumber> <codetype>Descriptor Code</codetype> <linecode>MATERIAL</linecode> <linedescription>Material Used in Progress Claim</linedescription> <lineunit>$</lineunit> <orderqty>1</orderqty> <orderunitprice>10</orderunitprice> <orderunittax>1</orderunittax> <extendedorderprice>10</extendedorderprice> <extendedordertax>1</extendedordertax> <priceoverride>True</priceoverride> <taxcode>GST</taxcode> </orderline> </orderheader> </purchaseorder>", Encoding.UTF8, "application/xml");
-
             HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0", content);
+            if (response.IsSuccessStatusCode)
+            {
+                //product = await response.Content.ReadAsAsync<AssemblyIssue>();
+                returned = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("API Consulted and answered successfully! Press Enter to see the result...");
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("API Consulted and answered an ERROR code! Press Enter to see the result...");
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+            }
+
+            return returned;
+        }
+        private static async Task<string> SQLAPI(HttpClient client, string returned)
+        {
+
+            string controller = "sqlquery";
+            string id = "";
+            //string tableParam = "";
+
+            //  -------- Working Example for Assembly Order ------- //
+            var content = new StringContent("select * from WAREHOUSEMASTER, INVENTORY, ITEMMASTER, LOCATIONMASTER where WAREHOUSEMASTER.WAREHOUSECODE = INVENTORY.WAREHOUSECODE and ITEMMASTER.ITEMCODE = INVENTORY.ITEMCODE and LOCATIONMASTER.LOCATIONCODE = INVENTORY.LOCATIONCODE and LOCATIONMASTER.WAREHOUSECODE = INVENTORY.WAREHOUSECODE order by SITEOREXTERNAL, SITENAME, INVENTORY.WAREHOUSECODE, INVENTORY.LOCATIONCODE, INVENTORY.ITEMCODE, INVENTORY.INVENTORYUNIT", Encoding.UTF8, "application/text");
+            
+
+            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&format=json&configuration=0", content);
             if (response.IsSuccessStatusCode)
             {
                 //product = await response.Content.ReadAsAsync<AssemblyIssue>();
