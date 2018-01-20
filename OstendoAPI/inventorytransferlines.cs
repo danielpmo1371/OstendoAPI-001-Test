@@ -4,11 +4,12 @@ using System.Text;
 
 namespace OstendoAPI
 {
-    class inventorytransferlines
+    public class inventorytransferlines
     {
         public int transferno { get; set; }
-        public int itemcode { get; set; }
-
+        public string itemcode { get; set; }
+        public double transferqty { get; set; }
+        public double sysuniqueid { get; set; }
 
         //Field:	TRANSFERNO Type:	INTEGER
         //Field:	ITEMCODE Type:	VARCHAR Length: 50

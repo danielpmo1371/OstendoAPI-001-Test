@@ -15,11 +15,12 @@ namespace OstendoAPI
     {
         static void Main(string[] args)
         {
+            OstendoAPI ostendoAPI = new OstendoAPI();
             Console.WriteLine("Hello World! Press Enter to continue..");
             Console.ReadLine();
-            GetList().Wait();
+            GetList(ostendoAPI).Wait();
         }
-        private static async Task GetList()
+        private static async Task GetList(OstendoAPI ostendoAPI)
         {
             HttpClient client = new HttpClient();
             string returned = null;
@@ -33,20 +34,32 @@ namespace OstendoAPI
                     "\n Press 1 for Get Method, " +
                     "\n 2 for Post Method, " +
                     "\n 3 for SQL, " +
-                    "\n 4 to Post Inventory Trasfer, " +
-                    "\n 5 to Get Transfer Info, " +
-                    "\n 6 to Get Transfer Items" +
-                    "\n 7 to Get Transfer Lines" +
+                    "\n 4 to Get Transfer Info, " +
+                    "\n 5 to Get Transfer Items" +
+                    "\n 6 to Get Transfer Lines" +
+                    "\n 7 to Post Inventory Trasfer, " +
+                    "\n 8 to Post Inventory Trasfer Lines, " +
+
+                    "\n 'm' to Execute minimal code for API" +
                     "\n 'q' to Quit");
                 method = Console.ReadLine();
                 if (method.Equals("1")){ returned = await ReachAPI(client, returned); }
                 if (method.Equals("2")){ returned = await PostAPI(client, returned); }
                 if (method.Equals("3")) { returned = await SQLAPI(client, returned); }
-                if (method.Equals("4")) { returned = await PostInventoryTransfer(client, returned); }
-                if (method.Equals("5")) { returned = await GetTransferInfo(client, returned); }
-                if (method.Equals("6")) { returned = await GetTransferItems(client, returned); }
-                if (method.Equals("7")) { returned = await GetTransferLines(client, returned); }
+                if (method.Equals("4")) { returned = await GetTransferInformation(ostendoAPI, returned); }
+                if (method.Equals("5")) { returned = await GetTransferItems(ostendoAPI, returned); }
+                if (method.Equals("6")) { returned = await GetTransferLines(ostendoAPI, returned); }
+                if (method.Equals("7")) { returned = await PostInventoryTransfer(ostendoAPI, returned); }
+                if (method.Equals("8")) { returned = await PostInventoryTransferLines(ostendoAPI, returned); }
 
+                // Minimal code to use API class to get a trasnfer info and stringfy the result
+                if (method.Equals("m"))
+                {
+                    OstendoAPI minimalAPI = new OstendoAPI();
+                    HttpResponseMessage responseFromMinimal = await minimalAPI.GetTransferInfo("8676");
+                    returned = await responseFromMinimal.Content.ReadAsStringAsync();
+                }
+                //Quit or print
                 if (method.Equals("q")) { Environment.Exit(0); }
                 else
                 {
@@ -57,46 +70,49 @@ namespace OstendoAPI
             }
         }
 
-        private static async Task<string> GetTransferInfo(HttpClient client, string returned)
+        private static async Task<string> GetTransferInformation(OstendoAPI ostendoAPI, string returned)
         {
-            string controller = "tabledata";
+            //Getting parameter from the user using console
             string id = "";
             Console.WriteLine("What's the Transfer Reference Number?");
             id = Console.ReadLine();
-            string tableParam = "&tablename=inventorytransfers&format=xml&condition=transferno='"+id+"'";
-            
-            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
 
+            //Getting the response from API
+            HttpResponseMessage response = await ostendoAPI.GetTransferInfo(id);
+            //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
+            //Returning the string for printing to console
             return returned;
         }
-        private static async Task<string> GetTransferItems(HttpClient client, string returned)
+        private static async Task<string> GetTransferItems(OstendoAPI ostendoAPI, string returned)
         {
-            string controller = "tabledata";
+            //Getting parameter from the user using console
             string id = "";
             Console.WriteLine("What's the Transfer Reference Number?");
             id = Console.ReadLine();
-            string tableParam = "&tablename=inventorytransitems&format=xml&condition=transferno='" + id + "'";
 
-            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
-
+            //Getting the response from API
+            HttpResponseMessage response = await ostendoAPI.GetTransferItems(id);
+            //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
+            //Returning the string for printing to console
             return returned;
         }
-        private static async Task<string> GetTransferLines(HttpClient client, string returned)
+        private static async Task<string> GetTransferLines(OstendoAPI ostendoAPI, string returned)
         {
-            string controller = "tabledata";
+            //Getting parameter from the user using console
             string id = "";
             Console.WriteLine("What's the Transfer Reference Number?");
             id = Console.ReadLine();
-            string tableParam = "&tablename=inventorytranslines&format=xml&condition=transferno='" + id + "'";
 
-            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
-
+            //Getting the response from API
+            HttpResponseMessage response = await ostendoAPI.GetTransferLines(id);
+            //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
+            //Returning the string for printing to console
             return returned;
         }
 
@@ -197,99 +213,51 @@ namespace OstendoAPI
 
             return returned;
         }
-        private static async Task<string> PostInventoryTransfer(HttpClient client, string returned)
+        private static async Task<string> PostInventoryTransfer(OstendoAPI ostendoAPI, string returned)
         {
+            //Getting Transfer Details from user via the console
+            Console.WriteLine("Please type: 'transferno', 'trasnferreferenceno', 'allocationmethod', 'transferstyle'" +
+                "\n Instructions: type only the data with no quotes and separate each field with comma");
+            string transfer = Console.ReadLine();
+            string[] transferfields = transfer.Split(",");
+            //Confirming what the user typed
+            Console.WriteLine("You typed:" +
+                "\n transferno = " + transferfields[0] +
+                "\n trasnferreferenceno = " + transferfields[1] +
+                "\n allocationmethod = " + transferfields[2] +
+                "\n transferstyle = " + transferfields[3]);
 
-            string controller = "tabledata";
-            string id = "";
-            string tableParam = "&tablename=inventorytransfers&keyfield=transferno&format=xml";
-            string contentString = "";
-            inventorytransfers invTransfer = new inventorytransfers();
-
-            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
-            invTransfer.transferno = 8674;
-            invTransfer.transferreference = "DANIEL STRIKES AGAIN";
-            //invTransfer.TRANSFERDATE = DateTime.Today.AddDays(-1).GetDateTimeFormats("dd/MM/yyyy");
-            //invTransfer.TRANSFERCHARGE = true;
-            invTransfer.allocationmethod = "Quantity";
-            invTransfer.transferstyle = "Location Transfer";
-            //invTransfer.CREATEFROM = "Automatic";
-            // -- END OF FILL IN --  //
-
-
-            // Serialize / Make XML
-            contentString = CreateXML(invTransfer);
-            contentString = contentXMLAdjustments(contentString);
-            Console.WriteLine("\n\n This is the contentString?");
-            Console.WriteLine(contentString);
-            Console.WriteLine("\n\n Should we continue?");
-            Console.ReadLine();
-
-            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
-
-            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
+            //Getting the response from API
+            HttpResponseMessage response = await ostendoAPI.PostInventoryTransfer(Int32.Parse(transferfields[0]), transferfields[1], transferfields[2], transferfields[3]);
+            //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
             return returned;
         }
-        private static async Task<string> PostInventoryTransferItem(HttpClient client, string returned)
+        private static string PostInventoryTransferItem(HttpClient client, string returned)
         {
-
-            string controller = "tabledata";
-            string id = "";
-            string tableParam = "&tablename=inventoryitems&keyfield=transferno&format=xml";
-            string contentString = "";
-            inventoryitem invItem = new inventoryitem();
-
-            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
-            invItem.transferno = 8674;
-            invItem.itemcode = "M7064";
-            
-            // -- END OF FILL IN --  //
-
-
-            // Serialize / Make XML
-            contentString = CreateXML(invItem);
-            contentString = contentXMLAdjustments(contentString);
-            Console.WriteLine("\n\n This is the contentString?");
-            Console.WriteLine(contentString);
-            Console.WriteLine("\n\n Should we continue?");
-            Console.ReadLine();
-
-            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
-
-            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
-            returned = await CheckSuccessAndPostToUser(returned, response);
+            returned = "API Implementation Not Available";
 
             return returned;
         }
-        private static async Task<string> PostInventoryTransferLines(HttpClient client, string returned)
+        private static async Task<string> PostInventoryTransferLines(OstendoAPI ostendoAPI, string returned)
         {
+            //Getting Transfer Details from user via the console
+            Console.WriteLine("Please type: 'transferno', 'itemcode', 'transferqty', 'sysuniqueid'" +
+                "\n Instructions: type only the data with no quotes and separate each field with comma");
+            string transfer = Console.ReadLine();
+            string[] transferfields = transfer.Split(",");
+            //Confirming what the user typed
+            Console.WriteLine("You typed:" +
+                "\n transferno = " + transferfields[0] +
+                "\n itemcode = " + transferfields[1] +
+                "\n transferqty = " + transferfields[2] +
+                "\n sysuniqueid = " + transferfields[3]
+                );
 
-            string controller = "tabledata";
-            string id = "";
-            string tableParam = "&tablename=inventorylines&keyfield=transferno&format=xml";
-            string contentString = "";
-            inventoryitem invItem = new inventoryitem();
-
-            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
-            invItem.transferno = 8674;
-            invItem.itemcode = "M7064";
-
-            // -- END OF FILL IN --  //
-
-
-            // Serialize / Make XML
-            contentString = CreateXML(invItem);
-            contentString = contentXMLAdjustments(contentString);
-            Console.WriteLine("\n\n This is the contentString?");
-            Console.WriteLine(contentString);
-            Console.WriteLine("\n\n Should we continue?");
-            Console.ReadLine();
-
-            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
-
-            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
+            //Getting the response from API
+            HttpResponseMessage response = await ostendoAPI.PostInventoryTransferLines(Int32.Parse(transferfields[0]), transferfields[1], Double.Parse(transferfields[2]), Double.Parse(transferfields[3]));
+            //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
             return returned;
