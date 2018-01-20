@@ -5,6 +5,9 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace OstendoAPI
 {
@@ -20,32 +23,97 @@ namespace OstendoAPI
         {
             HttpClient client = new HttpClient();
             string returned = null;
+            string method = "";
             client.BaseAddress = new Uri("http://Ostendo.ddns.net:235");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            Console.WriteLine("System initialized! Press 1 for Get Method, 2 for Post Method, 3 for SQL...");
-            string method = Console.ReadLine();
-            if (method.Equals("1")){ returned = await ReachAPI(client, returned); }
-            if (method.Equals("2")){ returned = await PostAPI(client, returned); }
-            if (method.Equals("3")) { returned = await SQLAPI(client, returned); }
-            Console.WriteLine(returned);
-            Console.WriteLine("   ------   -----   ------  \n Test Finished. Press Enter to close application...");
-            Console.ReadLine();
+            while (!method.Equals("q"))
+            {
+                Console.WriteLine("System initialized! " +
+                    "\n Press 1 for Get Method, " +
+                    "\n 2 for Post Method, " +
+                    "\n 3 for SQL, " +
+                    "\n 4 to Post Inventory Trasfer, " +
+                    "\n 5 to Get Transfer Info, " +
+                    "\n 6 to Get Transfer Items" +
+                    "\n 7 to Get Transfer Lines" +
+                    "\n 'q' to Quit");
+                method = Console.ReadLine();
+                if (method.Equals("1")){ returned = await ReachAPI(client, returned); }
+                if (method.Equals("2")){ returned = await PostAPI(client, returned); }
+                if (method.Equals("3")) { returned = await SQLAPI(client, returned); }
+                if (method.Equals("4")) { returned = await PostInventoryTransfer(client, returned); }
+                if (method.Equals("5")) { returned = await GetTransferInfo(client, returned); }
+                if (method.Equals("6")) { returned = await GetTransferItems(client, returned); }
+                if (method.Equals("7")) { returned = await GetTransferLines(client, returned); }
+
+                if (method.Equals("q")) { Environment.Exit(0); }
+                else
+                {
+                Console.WriteLine(returned);
+                Console.WriteLine("   ------   -----   ------  \n Test Finished. Press Enter to close application...");
+                Console.ReadLine();
+                }
+            }
         }
+
+        private static async Task<string> GetTransferInfo(HttpClient client, string returned)
+        {
+            string controller = "tabledata";
+            string id = "";
+            Console.WriteLine("What's the Transfer Reference Number?");
+            id = Console.ReadLine();
+            string tableParam = "&tablename=inventorytransfers&format=xml&condition=transferno='"+id+"'";
+            
+            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
+
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+        private static async Task<string> GetTransferItems(HttpClient client, string returned)
+        {
+            string controller = "tabledata";
+            string id = "";
+            Console.WriteLine("What's the Transfer Reference Number?");
+            id = Console.ReadLine();
+            string tableParam = "&tablename=inventorytransitems&format=xml&condition=transferno='" + id + "'";
+
+            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
+
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+        private static async Task<string> GetTransferLines(HttpClient client, string returned)
+        {
+            string controller = "tabledata";
+            string id = "";
+            Console.WriteLine("What's the Transfer Reference Number?");
+            id = Console.ReadLine();
+            string tableParam = "&tablename=inventorytranslines&format=xml&condition=transferno='" + id + "'";
+
+            HttpResponseMessage response = await client.GetAsync("/" + controller + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam);
+
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+
         private static async Task<string> ReachAPI(HttpClient client, string returned)
         {
             //string controller = "assemblyorder";
             //string id = "/WO1563";
             string controller = "tabledata";
             string id = "";
-            string tableParam = "&tablename=standardunits&format=xml";
-            Console.WriteLine("What controller do you want to use?");
-            controller = Console.ReadLine();
-            Console.WriteLine("What id do you want to use? If you want a table, leave it blank");
-            id = "/"+Console.ReadLine();
-            Console.WriteLine("If you want a table, what's the table name?");
-            tableParam = Console.ReadLine();
-            if (tableParam != "") { tableParam = "&tablename=" + tableParam + "&format=xml"; }
+            string tableParam = "&tablename=inventorytransfers&format=xml&condition=transferno='8665'";
+            //Console.WriteLine("What controller do you want to use?");
+            //controller = Console.ReadLine();
+            //Console.WriteLine("What id do you want to use? If you want a table, leave it blank");
+            //id = "/"+Console.ReadLine();
+            //Console.WriteLine("If you want a table, what's the table name?");
+            //tableParam = Console.ReadLine();
+            //if (tableParam != "") { tableParam = "&tablename=" + tableParam + "&format=xml"; }
             
             HttpResponseMessage response = await client.GetAsync("/"+controller+id+"?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0"+tableParam);
             if (response.IsSuccessStatusCode)
@@ -69,13 +137,22 @@ namespace OstendoAPI
         private static async Task<string> PostAPI(HttpClient client, string returned)
         {
 
-            string controller = "assemblyorder";
+            string controller = "";
             string id = "";
-            //string tableParam = "";
+            string tableParam = "";
+
 
             //  -------- Working Example for Assembly Order ------- //
+            controller = "assemblyorder";
+            id = "";
+            tableParam = "";
             var content = new StringContent("<assemblyorder><orderheader><ordernumber></ordernumber><orderdate>11/01/2018</orderdate><itemcode>F2125</itemcode><itemdescription>Whole Milk Powder 25kg Bag- China</itemdescription><itemunit>Kg</itemunit><requireddate>11/01/2018</requireddate><orderqty>4000</orderqty><orderline><ordernumber></ordernumber><stepname>Assembly</stepname><codetype>Item Code</codetype><linecode>M7030</linecode><linedescription>Asssembly of 02125</linedescription><lineunit>Ltr</lineunit><orderqty>9000</orderqty></orderline></orderheader></assemblyorder>", Encoding.UTF8, "application/xml");
             //  -------- Working Example for Assembly Order ------- //
+
+            Console.WriteLine("\n\n This is the content of the message?");
+            Console.WriteLine(await content.ReadAsStringAsync());
+            Console.WriteLine("\n\n Should we continue?");
+            Console.ReadLine();
 
             HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0", content);
             if (response.IsSuccessStatusCode)
@@ -119,6 +196,155 @@ namespace OstendoAPI
             }
 
             return returned;
+        }
+        private static async Task<string> PostInventoryTransfer(HttpClient client, string returned)
+        {
+
+            string controller = "tabledata";
+            string id = "";
+            string tableParam = "&tablename=inventorytransfers&keyfield=transferno&format=xml";
+            string contentString = "";
+            inventorytransfers invTransfer = new inventorytransfers();
+
+            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
+            invTransfer.transferno = 8674;
+            invTransfer.transferreference = "DANIEL STRIKES AGAIN";
+            //invTransfer.TRANSFERDATE = DateTime.Today.AddDays(-1).GetDateTimeFormats("dd/MM/yyyy");
+            //invTransfer.TRANSFERCHARGE = true;
+            invTransfer.allocationmethod = "Quantity";
+            invTransfer.transferstyle = "Location Transfer";
+            //invTransfer.CREATEFROM = "Automatic";
+            // -- END OF FILL IN --  //
+
+
+            // Serialize / Make XML
+            contentString = CreateXML(invTransfer);
+            contentString = contentXMLAdjustments(contentString);
+            Console.WriteLine("\n\n This is the contentString?");
+            Console.WriteLine(contentString);
+            Console.WriteLine("\n\n Should we continue?");
+            Console.ReadLine();
+
+            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
+
+            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+        private static async Task<string> PostInventoryTransferItem(HttpClient client, string returned)
+        {
+
+            string controller = "tabledata";
+            string id = "";
+            string tableParam = "&tablename=inventoryitems&keyfield=transferno&format=xml";
+            string contentString = "";
+            inventoryitem invItem = new inventoryitem();
+
+            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
+            invItem.transferno = 8674;
+            invItem.itemcode = "M7064";
+            
+            // -- END OF FILL IN --  //
+
+
+            // Serialize / Make XML
+            contentString = CreateXML(invItem);
+            contentString = contentXMLAdjustments(contentString);
+            Console.WriteLine("\n\n This is the contentString?");
+            Console.WriteLine(contentString);
+            Console.WriteLine("\n\n Should we continue?");
+            Console.ReadLine();
+
+            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
+
+            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+        private static async Task<string> PostInventoryTransferLines(HttpClient client, string returned)
+        {
+
+            string controller = "tabledata";
+            string id = "";
+            string tableParam = "&tablename=inventorylines&keyfield=transferno&format=xml";
+            string contentString = "";
+            inventoryitem invItem = new inventoryitem();
+
+            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
+            invItem.transferno = 8674;
+            invItem.itemcode = "M7064";
+
+            // -- END OF FILL IN --  //
+
+
+            // Serialize / Make XML
+            contentString = CreateXML(invItem);
+            contentString = contentXMLAdjustments(contentString);
+            Console.WriteLine("\n\n This is the contentString?");
+            Console.WriteLine(contentString);
+            Console.WriteLine("\n\n Should we continue?");
+            Console.ReadLine();
+
+            var content = new StringContent(contentString, Encoding.UTF8, "application/xml");
+
+            HttpResponseMessage response = await client.PostAsync("/" + controller + id + "?apikey=Ytm1VIhM2ai7fewNDR1FuJ8cJx4OCPQOAD95Dn94ih4pM00ClrQXfFUAAbnlMFVmCkCo4ZbWoD48196cwaZyzT0pbln270loYHHjC2tQ7fz5sg%3D%3D&configuration=0" + tableParam, content);
+            returned = await CheckSuccessAndPostToUser(returned, response);
+
+            return returned;
+        }
+
+        private static async Task<string> CheckSuccessAndPostToUser(string returned, HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                //product = await response.Content.ReadAsAsync<AssemblyIssue>();
+                returned = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("API Consulted and answered successfully! Press Enter to see the result...");
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("API Consulted and answered an ERROR code! Press Enter to see the result...");
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+            }
+
+            return returned;
+        }
+
+        private static string contentXMLAdjustments(string contentString)
+        {
+            contentString = contentString.Replace("\"<?xml version=\"1.0\"?><InventoryTransfers xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<InventoryTransfers>");
+            contentString = contentString.Replace("<?xml version=", "");
+            contentString = contentString.Replace("xmlns:xsi=", "");
+            contentString = contentString.Replace("http://www.w3.org/2001/XMLSchema-instance", "");
+            contentString = contentString.Replace("xmlns:xsd=", "");
+            contentString = contentString.Replace("http://www.w3.org/2001/XMLSchema", "");
+            contentString = contentString.Replace("?>", "");
+            contentString = contentString.Replace("1.0", "");
+            contentString = contentString.Replace("\"\"", "");
+            contentString = contentString.Replace("  ", "");
+            contentString = contentString.Insert(0, "<ostendoimport>");
+            contentString = contentString.Insert(contentString.Length, "</ostendoimport>");
+            //contentString = contentString.ToLower();
+            return contentString;
+        }
+
+        public static string CreateXML(Object YourClassObject)
+        {
+            XmlDocument xmlDoc = new XmlDocument();   //Represents an XML document, 
+                                                      // Initializes a new instance of the XmlDocument class.          
+            XmlSerializer xmlSerializer = new XmlSerializer(YourClassObject.GetType());
+            // Creates a stream whose backing store is memory. 
+            using (MemoryStream xmlStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(xmlStream, YourClassObject);
+                xmlStream.Position = 0;
+                //Loads the XML document from the specified string.
+                xmlDoc.Load(xmlStream);
+                return xmlDoc.InnerXml;
+            }
         }
     }
 }
