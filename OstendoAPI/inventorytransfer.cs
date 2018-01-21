@@ -12,7 +12,7 @@ namespace OstendoAPI
     {
         public int transferno { get; set; }
         public string transferreference { get; set; }
-        //public string TRANSFERSTATUS { get; set; }
+        public string transferstatus { get; set; }
         //public DateTime TRANSFERDATE { get; set; }
         //public string TRANSFERNOTES { get; set; }
         //public bool TRANSFERCHARGE { get; set; }

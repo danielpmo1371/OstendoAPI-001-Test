@@ -6,11 +6,26 @@ namespace OstendoAPI
 {
     public class inventorytransferlines
     {
+        //public double sysuniqueid { get; set; }
+        //public double inventorysysuniqueid { get; set; }
+        public string batchno { get; set; }
+        public string itemgrade { get; set; }
+
+        // REQUIRED SYSTEM FIELDS
         public int transferno { get; set; }
         public string itemcode { get; set; }
+        public string unit { get; set; }
+        public string fromwarehouse { get; set; }
+        public string towarehouse { get; set; }
+        public string fromlocation { get; set; }
+        public string tolocation { get; set; }
         public double transferqty { get; set; }
-        public double sysuniqueid { get; set; }
 
+
+
+
+
+        // --- --- --- --- --- --- --- --- --- --- --- --- //
         //Field:	TRANSFERNO Type:	INTEGER
         //Field:	ITEMCODE Type:	VARCHAR Length: 50
         //Field:	UNIT Type:	VARCHAR Length: 15

@@ -14,7 +14,6 @@ namespace OstendoAPI
     public class OstendoAPI
     {
         private HttpClient client = new HttpClient();
-        private string returned = "";
         public OstendoAPI()
         {
             client.BaseAddress = new Uri("http://Ostendo.ddns.net:235");
@@ -27,6 +26,7 @@ namespace OstendoAPI
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
         }
+
         public async Task<HttpResponseMessage> GetTransferInfo(string id)
         {
             string controller = "tabledata";
@@ -54,7 +54,8 @@ namespace OstendoAPI
 
             return response;
         }
-        public async Task<HttpResponseMessage> PostInventoryTransfer(int transferno, string transferreference, string allocationmethod, string transferstyle)
+
+        public async Task<HttpResponseMessage> PostInventoryTransfer(int transferno, string transferreference, string allocationmethod, string transferstyle, string status)
         {
 
             string controller = "tabledata";
@@ -65,11 +66,9 @@ namespace OstendoAPI
             //  ---  Fill in Inventory Transfer Details HARD CODED -- //
             invTransfer.transferno = transferno;
             invTransfer.transferreference = transferreference;
-            //invTransfer.TRANSFERDATE = DateTime.Today.AddDays(-1).GetDateTimeFormats("dd/MM/yyyy");
-            //invTransfer.TRANSFERCHARGE = true;
             invTransfer.allocationmethod = allocationmethod;
             invTransfer.transferstyle = transferstyle;
-            //invTransfer.CREATEFROM = "Automatic";
+            invTransfer.transferstatus = status;
             // -- END OF FILL IN --  //
 
             //// Serialize / Make XML
@@ -87,21 +86,49 @@ namespace OstendoAPI
 
             return response;
         }
-
         public async Task<HttpResponseMessage> PostInventoryTransferLines(int transferno, string itemcode, double transferqty, double sysuniqueid)
         {
 
             string controller = "tabledata";
-            string tableParam = "&tablename=inventorytransfers&keyfield=sysuniqueid&format=xml";
+            string tableParam = "&tablename=inventorytranslines&keyfield=transferno&format=xml";
             string contentString = "";
             inventorytransferlines invTransferLines = new inventorytransferlines();
 
-            //  ---  Fill in Inventory Transfer Details HARD CODED -- //
+            //  ---  Fill in Inventory Transfer Lines -- //
             invTransferLines.transferno = transferno;
             invTransferLines.itemcode = itemcode;
             invTransferLines.transferqty = transferqty;
-            invTransferLines.sysuniqueid = sysuniqueid;
+            //invTransferLines.sysuniqueid = sysuniqueid;
             // -- END OF FILL IN --  //
+
+            //  ---  Fill in Inventory Transfer Lines HARD CODED Overwrite-- //
+            invTransferLines.transferno = 8675;
+            invTransferLines.itemcode = "F2125";
+            invTransferLines.unit = "Kg";
+            invTransferLines.fromwarehouse = "NORMANS";
+            invTransferLines.towarehouse = "BRD Invercargill";
+            invTransferLines.fromlocation = "Normans";
+            invTransferLines.tolocation = "Bulk Dry Store";
+            invTransferLines.transferqty = 1137;
+            //invTransferLines.sysuniqueid = 4516036;
+            //invTransferLines.inventorysysuniqueid = 4438914;
+            // -- END OF FILL IN --  //
+
+            //  ---  Fill in Inventory Transfer Lines HARD CODED Overwrite-- //
+            invTransferLines.transferno = 8675;
+            invTransferLines.itemcode = "F9245";
+            invTransferLines.unit = "Kg";
+            invTransferLines.fromwarehouse = "NORMANS";
+            invTransferLines.towarehouse = "BRD Invercargill";
+            invTransferLines.fromlocation = "Normans";
+            invTransferLines.tolocation = "Bulk Dry Store";
+            invTransferLines.transferqty = 1200;
+            invTransferLines.batchno = "CB27 QA Hold";
+            invTransferLines.itemgrade = "B0001";
+            //invTransferLines.sysuniqueid = 4516036;
+            //invTransferLines.inventorysysuniqueid = 4438914;
+            // -- END OF FILL IN --  //
+
 
             //// Serialize / Make XML
             contentString = CreateXML(invTransferLines);

@@ -216,7 +216,7 @@ namespace OstendoAPI
         private static async Task<string> PostInventoryTransfer(OstendoAPI ostendoAPI, string returned)
         {
             //Getting Transfer Details from user via the console
-            Console.WriteLine("Please type: 'transferno', 'trasnferreferenceno', 'allocationmethod', 'transferstyle'" +
+            Console.WriteLine("Please type: 'transferno', 'trasnferreferenceno', 'allocationmethod', 'transferstyle', 'status'" +
                 "\n Instructions: type only the data with no quotes and separate each field with comma");
             string transfer = Console.ReadLine();
             string[] transferfields = transfer.Split(",");
@@ -225,10 +225,12 @@ namespace OstendoAPI
                 "\n transferno = " + transferfields[0] +
                 "\n trasnferreferenceno = " + transferfields[1] +
                 "\n allocationmethod = " + transferfields[2] +
-                "\n transferstyle = " + transferfields[3]);
+                "\n transferstyle = " + transferfields[3] +
+                "\n status = " + transferfields[4]
+                );
 
             //Getting the response from API
-            HttpResponseMessage response = await ostendoAPI.PostInventoryTransfer(Int32.Parse(transferfields[0]), transferfields[1], transferfields[2], transferfields[3]);
+            HttpResponseMessage response = await ostendoAPI.PostInventoryTransfer(Int32.Parse(transferfields[0]), transferfields[1], transferfields[2], transferfields[3], transferfields[4]);
             //Handling the response. In case successfull or fail it shows the correct message.
             returned = await CheckSuccessAndPostToUser(returned, response);
 
